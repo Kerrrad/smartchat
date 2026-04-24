@@ -16,11 +16,21 @@ depends_on = None
 
 
 def upgrade() -> None:
+    bind = op.get_bind()
+    display_category_enum = sa.Enum(
+        "PRIVATE",
+        "WORK",
+        "OTHER",
+        name="conversationdisplaycategoryenum",
+    )
+    if bind.dialect.name == "postgresql":
+        display_category_enum.create(bind, checkfirst=True)
+
     with op.batch_alter_table("conversation_participants") as batch_op:
         batch_op.add_column(
             sa.Column(
                 "display_category",
-                sa.Enum("PRIVATE", "WORK", "OTHER", name="conversationdisplaycategoryenum"),
+                display_category_enum,
                 nullable=False,
                 server_default="OTHER",
             )
@@ -28,5 +38,15 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    bind = op.get_bind()
+    display_category_enum = sa.Enum(
+        "PRIVATE",
+        "WORK",
+        "OTHER",
+        name="conversationdisplaycategoryenum",
+    )
+
     with op.batch_alter_table("conversation_participants") as batch_op:
         batch_op.drop_column("display_category")
+    if bind.dialect.name == "postgresql":
+        display_category_enum.drop(bind, checkfirst=True)
