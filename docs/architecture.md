@@ -1,63 +1,63 @@
 # Architektura projektu
 
-## 1. Przegląd
+## 1. Przeglad
 
-System został zaprojektowany w stylu warstwowym:
+System zostal zaprojektowany w stylu warstwowym:
 
 1. warstwa prezentacji: frontend HTML/CSS/JS,
 2. warstwa API: routery FastAPI,
 3. warstwa logiki biznesowej: serwisy,
-4. warstwa danych: SQLAlchemy + PostgreSQL,
+4. warstwa danych: SQLAlchemy + PostgreSQL lub SQLite w trybie developerskim,
 5. warstwa asynchroniczna: Celery + Redis,
 6. warstwa realtime: WebSocket manager.
 
-Taki układ upraszcza testowanie, rozbudowę i późniejsze dołączenie modeli NLP/ML.
+Taki uklad upraszcza testowanie, rozbudowe i pozniejsze dolaczenie modeli NLP/ML.
 
-## 2. Główne moduły
+## 2. Glowne moduly
 
 ### `backend/app/core`
 
-- konfiguracja środowiskowa,
-- bezpieczeństwo JWT i haszowanie haseł,
+- konfiguracja srodowiskowa i ustawienia `.env`,
+- bezpieczenstwo JWT i haszowanie hasel,
 - rate limiting,
 - logowanie systemowe.
 
 ### `backend/app/models`
 
-- modele ORM użytkowników,
-- konwersacje i uczestnicy,
-- wiadomości,
-- reguły autorespondera,
+- modele ORM uzytkownikow,
+- konwersacje, uczestnicy i kategorie widoku konwersacji,
+- wiadomosci,
+- reguly autorespondera,
 - powiadomienia,
 - logi audytowe i logi automatyzacji.
 
 ### `backend/app/schemas`
 
-- kontrakty wejścia/wyjścia API,
+- kontrakty wejscia i wyjscia API,
 - walidacja danych,
-- serializacja obiektów ORM.
+- serializacja obiektow ORM.
 
 ### `backend/app/services`
 
 - `auth_service` – rejestracja i logowanie,
-- `message_service` – wiadomości, historia, wyszukiwanie, statusy,
-- `classification_service` – kategoryzacja wiadomości,
-- `spam_service` – wykrywanie wiadomości niechcianych,
-- `autoresponder_service` – reguły i automatyczne odpowiedzi,
+- `message_service` – wiadomosci, historia, wyszukiwanie, statusy, grupy i kategorie konwersacji,
+- `classification_service` – kategoryzacja wiadomosci,
+- `spam_service` – wykrywanie wiadomosci niechcianych,
+- `autoresponder_service` – reguly i automatyczne odpowiedzi,
 - `admin_service` – statystyki, moderacja, diagnostyka,
-- `notification_service` – powiadomienia systemowe,
-- `presence_service` – statusy online/offline.
+- `notification_service` – powiadomienia systemowe i powiadomienia wiadomosci,
+- `presence_service` – statusy online i offline.
 
 ### `backend/app/api/v1`
 
-- endpointy REST dla wszystkich obszarów systemu,
-- autoryzacja przez zależności FastAPI,
+- endpointy REST dla wszystkich obszarow systemu,
+- autoryzacja przez zaleznosci FastAPI,
 - automatyczna dokumentacja Swagger/OpenAPI.
 
 ### `backend/app/websocket`
 
-- utrzymywanie aktywnych połączeń,
-- broadcasty wiadomości,
+- utrzymywanie aktywnych polaczen,
+- broadcasty wiadomosci i zmian konwersacji,
 - typing indicator,
 - statusy `read`,
 - zdarzenia presence.
@@ -65,119 +65,144 @@ Taki układ upraszcza testowanie, rozbudowę i późniejsze dołączenie modeli 
 ### `backend/app/workers`
 
 - integracja z Celery,
-- asynchroniczne przetwarzanie automatyzacji wiadomości,
-- możliwość dalszej rozbudowy o zadania cykliczne.
+- asynchroniczne przetwarzanie automatyzacji wiadomosci,
+- mozliwosc dalszej rozbudowy o zadania cykliczne.
 
 ## 3. Model danych
 
-Najważniejsze tabele:
+Najwazniejsze tabele:
 
 - `users`
-  przechowuje dane konta, role, status, ustawienia prywatności i powiadomień.
+  przechowuje dane konta, role, status, ustawienia prywatnosci i powiadomien.
 
 - `conversations`
-  zawiera metadane rozmów prywatnych i grupowych.
+  zawiera metadane rozmow prywatnych i grupowych.
 
 - `conversation_participants`
-  wiąże użytkowników z konwersacjami i przechowuje stan odczytu.
+  wiaze uzytkownikow z konwersacjami i przechowuje:
+  - moment dolaczenia,
+  - stan odczytu,
+  - wyciszenie,
+  - prywatna kategorie widoku konwersacji u danego uzytkownika (`private`, `work`, `other`).
 
 - `messages`
-  zapisuje treść, status, kategorię, wynik spamu, metadane analizy i flagę automatyzacji.
+  zapisuje tresc, status, kategorie, wynik spamu, metadane analizy i flage automatyzacji.
 
 - `notifications`
-  powiadomienia o nowych wiadomościach i akcjach systemu.
+  powiadomienia o nowych wiadomosciach i akcjach systemu. Moga byc powiazane z wiadomoscia albo bezposrednio z konwersacja.
 
 - `autoresponder_rules`
-  reguły automatycznych odpowiedzi użytkowników.
+  reguly automatycznych odpowiedzi uzytkownikow.
 
 - `audit_logs`
-  logi zdarzeń biznesowych i administracyjnych.
+  logi zdarzen biznesowych i administracyjnych.
 
 - `automation_logs`
-  historia automatycznie wykonanych działań.
+  historia automatycznie wykonanych dzialan.
 
-## 4. Przepływ wiadomości
+## 4. Przeplyw wiadomosci
 
-1. użytkownik wysyła wiadomość przez REST API,
-2. `message_service` sprawdza dostęp do konwersacji,
-3. `classification_service` nadaje kategorię,
+1. uzytkownik wysyla wiadomosc przez REST API,
+2. `message_service` sprawdza dostep do konwersacji,
+3. `classification_service` nadaje kategorie podstawowa,
 4. `spam_service` oblicza wynik spamu,
-5. wiadomość jest zapisywana w bazie,
-6. generowane są powiadomienia dla odbiorców,
-7. WebSocket broadcast dostarcza wiadomość online,
-8. autoresponder uruchamia się inline i opcjonalnie przez Celery.
+5. wiadomosc jest zapisywana w bazie ze statusem `sent`,
+6. generowane sa powiadomienia dla odbiorcow,
+7. WebSocket broadcast dostarcza wiadomosc online,
+8. autoresponder uruchamia sie inline i opcjonalnie przez Celery, ale tylko dla konwersacji prywatnych.
 
-## 5. Mechanizm klasyfikacji wiadomości
+## 5. Mechanizm klasyfikacji wiadomosci
 
-Pierwsza wersja opiera się na regułach i słowach kluczowych:
+Pierwsza wersja opiera sie na regulach i slowach kluczowych:
 
-- `urgent` – słowa typu `pilne`, `asap`, `awaria`,
-- `announcement` – `ogłoszenie`, `komunikat`, `informacja`,
+- `urgent` – slowa typu `pilne`, `asap`, `awaria`,
+- `announcement` – `ogloszenie`, `komunikat`, `informacja`,
 - `offer` – `oferta`, `promocja`, `rabat`,
-- `question` – znak `?` lub forma pytająca,
-- `private` – kategoria domyślna,
-- `spam` – nadpisuje kategorię, jeśli spam detector przekroczy próg.
+- `question` – znak `?` lub forma pytajaca,
+- `private` – kategoria domyslna,
+- `spam` – nadpisuje kategorie, jesli spam detector przekroczy prog.
 
-Ważne: klasyfikator został celowo odizolowany w osobnym serwisie, aby można było go łatwo zastąpić:
+Wazne: klasyfikator zostal celowo odizolowany w osobnym serwisie, aby mozna bylo go latwo zastapic:
 
 - klasyfikatorem `scikit-learn`,
 - modelem `transformers`,
-- usługą LLM lub modelem hybrydowym.
+- usluga LLM lub modelem hybrydowym.
 
 ## 6. Mechanizm wykrywania spamu
 
 Zastosowana logika wykorzystuje heurystyki:
 
-- liczba linków,
-- podejrzane słowa kluczowe,
+- liczba linkow,
+- podejrzane slowa kluczowe,
 - nadmiar wielkich liter,
-- powtarzające się znaki,
-- duża liczba wykrzykników.
+- powtarzajace sie znaki,
+- duza liczba wykrzyknikow.
 
-Wynik to `spam_score` z przedziału `0.0-1.0`. Po przekroczeniu progu wiadomość:
+Wynik to `spam_score` z przedzialu `0.0-1.0`. Po przekroczeniu progu wiadomosc:
 
 - zostaje oznaczona jako spam,
-- otrzymuje kategorię `spam`,
-- może być przeglądana w panelu administratora.
+- otrzymuje kategorie `spam`,
+- moze byc przegladana w panelu administratora.
 
 ## 7. Mechanizm automatycznej odpowiedzi
 
-Obsługiwane typy reguł:
+Obslugiwane typy regul:
 
-- `question` – odpowiedź na wiadomości sklasyfikowane jako pytania,
-- `keyword` – odpowiedź na podstawie słów kluczowych,
-- `off_hours` – odpowiedź poza wybranymi godzinami aktywności.
+- `question` – odpowiedz na wiadomosci sklasyfikowane jako pytania,
+- `keyword` – odpowiedz na podstawie slow kluczowych,
+- `off_hours` – odpowiedz poza wybranymi godzinami aktywnosci.
 
-Zapis historii odpowiedzi realizowany jest w `automation_logs`, a same odpowiedzi trafiają do tabeli `messages` z flagą `is_automated=True`.
+Aktualne zasady dzialania:
 
-## 8. Bezpieczeństwo
+- autoresponder dziala tylko w konwersacjach prywatnych,
+- dla jednego odbiorcy wybierana jest pierwsza pasujaca regula,
+- reguly `off_hours` bez godzin sa traktowane jako stale aktywne,
+- odpowiedzi sa zapisywane w `messages` z flaga `is_automated = true`,
+- historia odpowiedzi trafia do `automation_logs`.
 
-W projekcie uwzględniono:
+## 8. Powiadomienia
 
-- haszowanie haseł `bcrypt`,
-- ochronę endpointów JWT,
-- walidację wejścia przez Pydantic,
-- podstawowy rate limiting dla logowania, rejestracji i wysyłania wiadomości,
-- rozdzielenie ról `user` / `admin`,
-- obsługę kont zablokowanych,
-- logi audytowe dla działań wrażliwych.
+System zapisuje trzy glowne typy powiadomien:
 
-## 9. Obsługa błędów i logowanie
+- `message` – nowe wiadomosci,
+- `system` – zdarzenia systemowe, np. dodanie do grupy,
+- `automation` – informacje o wykonaniu automatyzacji.
+
+Dodatkowo powiadomienia:
+
+- przechowuja kategorie wiadomosci przez pole pochodne `message_category`,
+- przechowuja identyfikator konwersacji,
+- sa deduplikowane per konwersacja, aby dla jednego czatu zostawic tylko najnowsze nieprzeczytane powiadomienie.
+
+## 9. Bezpieczenstwo
+
+W projekcie uwzgledniono:
+
+- haszowanie hasel `bcrypt`,
+- ochrone endpointow JWT,
+- walidacje wejscia przez Pydantic,
+- podstawowy rate limiting dla logowania, rejestracji i wysylania wiadomosci,
+- rozdzielenie rol `user` i `admin`,
+- obsluge kont zablokowanych,
+- logi audytowe dla dzialan wrazliwych,
+- ustawienie prywatnosci profilu blokujace inicjowanie nowych rozmow i dodawanie do grup, jesli profil jest ukryty.
+
+## 10. Obsluga bledow i logowanie
 
 - logowanie aplikacyjne jest skonfigurowane centralnie,
-- zdarzenia biznesowe są zapisywane do `audit_logs`,
-- automatyzacje zapisują własną historię,
-- błędy walidacji są zwracane przez FastAPI,
-- logika biznesowa używa wyjątków HTTP tam, gdzie ma to sens.
+- zdarzenia biznesowe sa zapisywane do `audit_logs`,
+- automatyzacje zapisuje wlasna historie,
+- bledy walidacji sa zwracane przez FastAPI,
+- logika biznesowa uzywa wyjatkow HTTP tam, gdzie ma to sens.
 
-## 10. Rozbudowa systemu
+## 11. Rozbudowa systemu
 
-Projekt przygotowano tak, aby łatwo dodać:
+Projekt przygotowano tak, aby latwo dodac:
 
-- załączniki i multimedia,
-- szyfrowanie end-to-end na poziomie treści,
+- zalaczniki i multimedia,
+- szyfrowanie end-to-end na poziomie tresci,
 - harmonogramy automatyzacji,
 - ranking spamu oparty o model ML,
-- moderację treści w grupach,
-- osobny frontend SPA w React.
-
+- moderacje tresci w grupach,
+- osobny frontend SPA w React,
+- bardziej zaawansowane kategorie konwersacji i reguly workflow.

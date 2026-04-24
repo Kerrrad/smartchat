@@ -363,16 +363,10 @@ code {
   display: flex;
   gap: 12px;
   align-items: center;
+  justify-content: flex-end;
   flex: 1 1 auto;
   flex-wrap: nowrap;
   min-width: 0;
-}
-
-.topbar-actions input {
-  width: auto;
-  flex: 1 1 320px;
-  min-width: 280px;
-  background: var(--bg-muted);
 }
 
 .topbar-nav {
@@ -672,6 +666,11 @@ code {
   padding: 12px;
 }
 
+.conversation-group,
+.conversation-group .notification-group-content {
+  overflow: visible;
+}
+
 .notification-item {
   cursor: pointer;
 }
@@ -742,6 +741,10 @@ code {
   flex-shrink: 0;
 }
 
+.conversation-menu[open] {
+  z-index: 20;
+}
+
 .conversation-menu summary {
   list-style: none;
 }
@@ -763,7 +766,7 @@ code {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  z-index: 5;
+  z-index: 30;
   min-width: 150px;
   display: grid;
   gap: 6px;
@@ -1220,12 +1223,6 @@ code {
 
   .topbar-actions {
     flex-wrap: wrap;
-  }
-
-  .topbar-actions input {
-    width: 100%;
-    flex-basis: 100%;
-    min-width: 0;
   }
 
   .message-bubble {

@@ -1,97 +1,104 @@
-# Porównanie z innymi systemami komunikacyjnymi
+# Porownanie z innymi systemami komunikacyjnymi
 
-## 1. Cel porównania
+## 1. Cel porownania
 
-Poniższa tabela pokazuje, gdzie projekt SmartChat Automation lokuje się względem popularnych komunikatorów. Celem nie jest stwierdzenie, że jest „lepszy” od produktów komercyjnych, lecz pokazanie:
+Ponizsza tabela pokazuje, gdzie projekt SmartChat Automation lokuje sie wzgledem popularnych komunikatorow. Celem nie jest stwierdzenie, ze jest „lepszy” od produktow komercyjnych, lecz pokazanie:
 
-- jakie funkcje są już zaimplementowane,
-- jakie funkcje można łatwo rozbudować,
-- jakie cechy są szczególnie istotne z punktu widzenia pracy dyplomowej.
+- jakie funkcje sa juz zaimplementowane,
+- jakie funkcje mozna latwo rozbudowac,
+- jakie cechy sa szczegolnie istotne z punktu widzenia pracy dyplomowej.
 
-## 2. Tabela porównawcza
+## 2. Tabela porownawcza
 
 | Kryterium | SmartChat Automation | Messenger | WhatsApp | Discord | Slack |
 |---|---|---|---|---|---|
 | Komunikacja prywatna | Tak | Tak | Tak | Tak | Tak |
-| Komunikacja grupowa | Tak, w backendzie i API | Tak | Tak | Tak | Tak |
+| Komunikacja grupowa | Tak | Tak | Tak | Tak | Tak |
 | Realtime WebSocket | Tak | Tak | Tak | Tak | Tak |
 | Typing indicator | Tak | Tak | Tak | Tak | Tak |
-| Statusy wiadomości | Tak | Częściowo | Tak | Częściowo | Częściowo |
-| Automatyzacja odpowiedzi | Tak, regułowa | Ograniczona | Ograniczona | Zależna od botów | Tak, przez workflow i boty |
-| Wykrywanie spamu | Tak, heurystyki + panel admina | Wewnętrzne, zamknięte | Wewnętrzne, zamknięte | Moderacja serwerowa / boty | Moderacja + integracje |
-| Rozszerzalność systemu | Wysoka, pełny kod źródłowy | Niska | Niska | Średnia, boty | Wysoka, integracje |
-| Panel administracyjny | Tak | Ograniczony | Ograniczony | Tak, dla serwerów | Tak |
-| Możliwość badań akademickich | Bardzo wysoka | Niska | Niska | Średnia | Średnia |
-| Prywatność i bezpieczeństwo | JWT, role, walidacja, logi | Wysokie, ale zamknięte | Bardzo wysokie i komercyjne | Zależne od konfiguracji | Wysokie biznesowe |
-| Użycie prywatne | Tak | Tak | Tak | Tak | Raczej mniej |
-| Użycie biznesowe | Tak, po rozbudowie | Ograniczone | Ograniczone | Tak, zespoły techniczne | Bardzo dobre |
+| Statusy wiadomosci | Tak, `sent` i `read` | Czesciowo | Tak | Czesciowo | Czesciowo |
+| Automatyzacja odpowiedzi | Tak, regulowa, obecnie w rozmowach prywatnych | Ograniczona | Ograniczona | Zalezna od botow | Tak, przez workflow i boty |
+| Wykrywanie spamu | Tak, heurystyki + panel admina | Wewnetrzne, zamkniete | Wewnetrzne, zamkniete | Moderacja serwerowa / boty | Moderacja + integracje |
+| Rozszerzalnosc systemu | Wysoka, pelny kod zrodlowy | Niska | Niska | Srednia, boty | Wysoka, integracje |
+| Panel administracyjny | Tak | Ograniczony | Ograniczony | Tak, dla serwerow | Tak |
+| Mozliwosc badan akademickich | Bardzo wysoka | Niska | Niska | Srednia | Srednia |
+| Prywatnosc i bezpieczenstwo | JWT, role, walidacja, logi, prywatnosc profilu | Wysokie, ale zamkniete | Bardzo wysokie i komercyjne | Zalezne od konfiguracji | Wysokie biznesowe |
+| Uzycie prywatne | Tak | Tak | Tak | Tak | Raczej mniej |
+| Uzycie biznesowe | Tak, po rozbudowie | Ograniczone | Ograniczone | Tak, zespoly techniczne | Bardzo dobre |
 
-## 3. Wnioski z porównania
+## 3. Wnioski z porownania
 
 ### Komunikacja prywatna
 
 SmartChat pokrywa podstawowe scenariusze komunikacji 1:1:
 
-- tworzenie rozmów,
-- historia wiadomości,
+- tworzenie rozmow,
+- historia wiadomosci,
 - statusy,
 - realtime,
 - wyszukiwanie.
 
 ### Komunikacja grupowa
 
-Projekt wspiera grupy na poziomie modelu danych i API. To ważne, bo pozwala rozwinąć system o:
+Projekt wspiera grupy na poziomie modelu danych, API i interfejsu uzytkownika. Obejmuje to:
 
-- kanały tematyczne,
+- tworzenie czatow grupowych,
+- zarzadzanie uczestnikami,
+- opuszczanie grupy,
+- usuwanie grupy przez wlasciciela,
+- prywatne kategorie konwersacji po stronie uzytkownika.
+
+To pozwala dalej rozwinac system o:
+
+- kanaly tematyczne,
 - role grupowe,
-- moderację grup,
+- moderacje grup,
 - boty konwersacyjne.
 
-### Automatyzacja wiadomości
+### Automatyzacja wiadomosci
 
-To obszar, w którym projekt wyróżnia się najbardziej jako praca akademicka. W typowych komunikatorach:
+To obszar, w ktorym projekt wyroznia sie najbardziej jako praca akademicka. W typowych komunikatorach:
 
-- automatyzacje bywają ukryte,
-- są zależne od zamkniętych usług,
-- albo wymagają zewnętrznych integracji.
+- automatyzacje bywaja ukryte,
+- sa zalezne od zamknietych uslug,
+- albo wymagaja zewnetrznych integracji.
 
-W SmartChat logika jest jawna, testowalna i łatwa do rozbudowy.
+W SmartChat logika jest jawna, testowalna i latwa do rozbudowy. Obecnie autoresponder dziala w rozmowach prywatnych, co upraszcza przewidywalnosc zachowania systemu.
 
 ### Moderacja i spam detection
 
-W systemach komercyjnych mechanizmy moderacji zwykle są zamknięte. W SmartChat:
+W systemach komercyjnych mechanizmy moderacji zwykle sa zamkniete. W SmartChat:
 
-- można badać heurystyki,
-- łatwo mierzyć skuteczność,
-- można porównywać klasyfikatory regułowe i ML,
-- administrator ma pełen wgląd w wyniki.
+- mozna badac heurystyki,
+- latwo mierzyc skutecznosc,
+- mozna porownywac klasyfikatory regulowe i ML,
+- administrator ma pelen wglad w wyniki.
 
-### Rozszerzalność
+### Rozszerzalnosc
 
-Pod względem edukacyjnym SmartChat wygrywa z systemami komercyjnymi, bo:
+Pod wzgledem edukacyjnym SmartChat wygrywa z systemami komercyjnymi, bo:
 
 - kod jest otwarty,
 - architektura jest modularna,
-- można dołączać nowe algorytmy i moduły bez przebudowy całego systemu.
+- mozna dolaczac nowe algorytmy i moduly bez przebudowy calego systemu.
 
 ## 4. Zastosowanie prywatne i biznesowe
 
-### Środowisko prywatne
+### Srodowisko prywatne
 
-Projekt nadaje się do:
+Projekt nadaje sie do:
 
-- małych społeczności,
+- malych spolecznosci,
 - komunikacji projektowej,
-- eksperymentów z automatyzacją odpowiedzi,
-- demonstracji systemów antyspamowych.
+- eksperymentow z automatyzacja odpowiedzi,
+- demonstracji systemow antyspamowych.
 
-### Środowisko biznesowe
+### Srodowisko biznesowe
 
-Po dalszym rozwoju system może zostać rozbudowany o:
+Po dalszym rozwoju system moze zostac rozbudowany o:
 
-- integrację z e-mail i kalendarzem,
-- wieloorganizacyjność,
-- kontrolę uprawnień per workspace,
-- archiwizację zgodną z politykami firmy,
+- integracje z e-mail i kalendarzem,
+- wieloorganizacyjnosc,
+- kontrole uprawnien per workspace,
+- archiwizacje zgodna z politykami firmy,
 - metryki SLA i monitoring produkcyjny.
-

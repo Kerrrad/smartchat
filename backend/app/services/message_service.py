@@ -479,7 +479,6 @@ async def send_message(
         analysis_metadata={
             "classification_labels": classification.labels,
             "classification_reasons": classification.reasons,
-            "classification_confidence": classification.confidence,
             "spam_reasons": spam.reasons,
         },
     )
@@ -587,7 +586,6 @@ async def update_message(
     message.analysis_metadata = {
         "classification_labels": classification.labels,
         "classification_reasons": classification.reasons,
-        "classification_confidence": classification.confidence,
         "spam_reasons": spam.reasons,
     }
     message.is_edited = True

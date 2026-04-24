@@ -49,10 +49,8 @@ class MessageAnalysisRequest(OrmSchema):
 
 class MessageAnalysisPreview(OrmSchema):
     category: MessageCategoryEnum
-    confidence: float
     labels: list[str]
     reasons: list[str]
     is_spam: bool
     spam_score: float
     spam_reasons: list[str]
-

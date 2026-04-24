@@ -95,11 +95,6 @@ function cacheElements() {
     "avatar-badge",
     "notification-list",
     "refresh-notifications-button",
-    "analysis-input",
-    "run-analysis-button",
-    "analysis-output",
-    "health-check-button",
-    "health-output",
     "profile-form",
     "profile-username",
     "profile-status",
@@ -167,7 +162,6 @@ function cacheElements() {
     "admin-spam",
     "admin-diagnostics",
     "admin-logs",
-    "global-search",
     "message-search-input",
     "run-search-button",
     "search-results",
@@ -189,8 +183,6 @@ function bindEvents() {
   elements["message-input"].addEventListener("input", handleTyping);
   elements["conversation-search"].addEventListener("input", renderConversations);
   elements["refresh-notifications-button"].addEventListener("click", loadNotifications);
-  elements["run-analysis-button"].addEventListener("click", runAnalysisFromPanel);
-  elements["health-check-button"].addEventListener("click", runHealthCheck);
   elements["profile-form"].addEventListener("submit", saveProfile);
   elements["profile-bio"].addEventListener("input", updateProfileBioHint);
   elements["rule-form"].addEventListener("submit", createRule);
@@ -214,13 +206,6 @@ function bindEvents() {
   elements["group-leave-button"].addEventListener("click", leaveGroupConversation);
   elements["admin-refresh-button"].addEventListener("click", loadAdminPanel);
   elements["run-search-button"].addEventListener("click", runGlobalSearch);
-  elements["global-search"].addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      elements["message-search-input"].value = elements["global-search"].value;
-      runGlobalSearch();
-    }
-  });
   elements.navButtons.forEach((button) =>
     button.addEventListener("click", () => activateView(button.dataset.view)),
   );
@@ -832,42 +817,6 @@ async function handleInlineAnalysis() {
     return;
   }
   return;
-}
-
-async function runAnalysisFromPanel() {
-  await runAnalysis(elements["analysis-input"].value, elements["analysis-output"], true);
-}
-
-async function runAnalysis(content, targetElement, asCode) {
-  try {
-    const result = await api("/api/v1/conversations/messages/analyze", {
-      method: "POST",
-      body: JSON.stringify({ content }),
-    });
-    if (asCode) {
-      targetElement.textContent = JSON.stringify(result, null, 2);
-    } else {
-      targetElement.innerHTML = `
-        <strong>Kategoria:</strong> ${result.category}<br />
-        <strong>Pewność:</strong> ${result.confidence}<br />
-        <strong>Spam:</strong> ${result.is_spam ? "tak" : "nie"} (${result.spam_score})<br />
-        <strong>Etykiety:</strong> ${result.labels.join(", ") || "brak"}<br />
-        <strong>Uzasadnienie:</strong> ${result.reasons.join(" | ")}<br />
-        <strong>Spam reasons:</strong> ${result.spam_reasons.join(" | ")}
-      `;
-    }
-  } catch (error) {
-    showToast(error.message, true);
-  }
-}
-
-async function runHealthCheck() {
-  try {
-    const result = await api("/api/v1/health");
-    elements["health-output"].textContent = JSON.stringify(result, null, 2);
-  } catch (error) {
-    showToast(error.message, true);
-  }
 }
 
 async function saveProfile(event) {
@@ -1769,7 +1718,7 @@ async function handleMessageAction(event) {
 }
 
 async function runGlobalSearch() {
-  const query = (elements["message-search-input"].value || elements["global-search"].value || "").trim();
+  const query = elements["message-search-input"].value.trim();
   if (!query) return;
   try {
     const results = await api(`/api/v1/conversations/messages/search?q=${encodeURIComponent(query)}`);

@@ -1,5 +1,6 @@
 from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 from redis import asyncio as redis_async
 
 from app.core.config import settings
@@ -51,6 +52,7 @@ async def list_spam_messages(session: AsyncSession) -> list[Message]:
     result = await session.execute(
         select(Message)
         .where(Message.is_spam.is_(True))
+        .options(selectinload(Message.sender))
         .order_by(Message.created_at.desc())
     )
     return list(result.scalars().unique())
@@ -130,4 +132,3 @@ async def run_diagnostics(session: AsyncSession) -> list[DiagnosticsCheck]:
         checks.append(DiagnosticsCheck(name="redis", ok=False, details=str(exc)))
 
     return checks
-
