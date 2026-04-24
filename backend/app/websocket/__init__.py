@@ -1,0 +1,2 @@
+"""Obsługa połączeń czasu rzeczywistego."""
+

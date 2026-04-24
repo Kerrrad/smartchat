@@ -1,0 +1,2 @@
+"""Warstwa API aplikacji."""
+

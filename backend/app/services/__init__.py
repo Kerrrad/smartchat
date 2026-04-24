@@ -1,0 +1,2 @@
+"""Logika biznesowa aplikacji."""
+

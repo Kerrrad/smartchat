@@ -1,0 +1,2 @@
+"""Pakiet główny aplikacji SmartChat."""
+

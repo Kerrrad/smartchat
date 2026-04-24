@@ -1,0 +1,2 @@
+"""Modele SQLAlchemy projektu."""
+
